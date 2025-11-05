@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Click Logo App</title>
+<style>
+body { margin:0; background:white; cursor:pointer; height:100vh; }
+.logo { position:absolute; width:80px; height:80px; transform:translate(-50%, -50%); pointer-events:none; }
+</style>
+</head>
+<body>
+
+<script>
+const logos = [
+  "https://upload.wikimedia.org/wikipedia/commons/3/3a/OpenShift-LogoType.svg",
+  "https://raw.githubusercontent.com/kubernetes/kubernetes/master/logo/logo.svg"
+];
+
+function showLogo(x, y, logo) {
+  const img = document.createElement("img");
+  img.src = logo;
+  img.className = "logo";
+  img.style.left = x + "px";
+  img.style.top = y + "px";
+  document.body.appendChild(img);
+}
+
+async function loadClicks() {
+  const res = await fetch("/api/clicks");
+  const clicks = await res.json();
+  clicks.forEach(c => showLogo(c.x, c.y, c.logo));
+}
+
+document.addEventListener("click", async (e) => {
+  const logo = logos[Math.floor(Math.random() * logos.length)];
+  showLogo(e.clientX, e.clientY, logo);
+
+  await fetch("/api/clicks", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ x: e.clientX, y: e.clientY, logo })
+  });
+});
+
+loadClicks();
+</script>
+
+</body>
+</html>
